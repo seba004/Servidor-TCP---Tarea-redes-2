@@ -1,16 +1,56 @@
 import java.io.*;
 import java.net.*;
+import java.util.StringTokenizer;
 
 public class servidorTCP implements Runnable {
 	
 	static final int puerto  = 8086;
 	Socket con;
-	
+	String protocol_set[] ={"hi_back","dispach_message","save_message"};
 	
 	public servidorTCP(Socket con) {
 		this.con = con;
 	}
 
+	public void hi_back() throws IOException{
+		DataOutputStream outClient =new DataOutputStream(this.con.getOutputStream());
+		outClient.writeBytes(protocol_set[0]+"¬¬"+"BUENOS  DIAS BUENAS TARDES"+'\n');
+		outClient.flush();
+	}
+	
+	public void dispach_message (String IP,String puerto, String ip_contacto, String port_contacto) throws IOException{
+		DataOutputStream outClient =new DataOutputStream(this.con.getOutputStream());
+		String fichero =ip_contacto+port_contacto+IP+puerto+".txt";
+		FileReader fr = new FileReader (fichero);
+		BufferedReader br = new BufferedReader(fr);
+		String linea;
+		
+		while((linea=br.readLine())!=null){
+			 String mensaje = protocol_set[1]+"##"+linea+"\n";
+	         outClient.writeBytes(linea);
+	         outClient.flush();
+		}
+	}
+	
+	public void save_message(String IP,String puerto, String ip_contacto, String port_contacto,String message) throws IOException{
+		DataOutputStream outClient =new DataOutputStream(this.con.getOutputStream());
+		String fichero =IP+puerto+ip_contacto+port_contacto+".txt";
+		FileWriter escri = new FileWriter("src/" + fichero,true);
+		escri.write(IP+":"+message+"\r\n");
+		escri.close();
+		
+		//File chat = new File(IP+puerto+ip_contacto,port_contacto+".txt");
+		//FileWriter escribir = new FileWriter(chat, true);
+		//BufferedWriter escritor2 =new BufferedWriter(escribir);
+		//PrintWriter escritor3 = new PrintWriter(escritor2);
+		//escritor3.append(IP+":"+message+"\r\n");
+		//escritor3.close();
+		//escritor2.close();
+		
+		outClient.writeBytes(protocol_set[2]+"¬¬"+"mensaje recivido"+'\n');
+		outClient.flush();
+		
+	}
 	public static void main(String argv[]) throws Exception{ 	 	
 			
 			ServerSocket socketservidor = new ServerSocket(puerto);
@@ -22,17 +62,6 @@ public class servidorTCP implements Runnable {
 				
 				}
 			}
-		
-	
-	
-	public void hi_back() throws IOException{
-		DataOutputStream outToClient = new DataOutputStream(this.con.getOutputStream());
-		//String message_final = aca estoy trabajandooo!!!
-	}
-	
-	
-	
-	
 	
 	
 	@Override
@@ -42,11 +71,36 @@ public class servidorTCP implements Runnable {
 		
 		try {
 				BufferedReader inFromClient = new BufferedReader(new InputStreamReader(con.getInputStream()));
-				DataOutputStream outToClient = new DataOutputStream(this.con.getOutputStream());
 				clientSentence = inFromClient.readLine(); 
-				
-				
-				
+				while(clientSentence != null){
+					StringTokenizer tokens = new StringTokenizer(clientSentence,"¬¬");
+					String Protocolo =tokens.nextToken();
+					switch(Protocolo){
+					case("say_hi"):
+						hi_back();
+						clientSentence = inFromClient.readLine();
+						System.out.println(clientSentence);
+						break;
+					case("ask_message"):
+						String ip_salida =tokens.nextToken();
+						String puerto_salida=tokens.nextToken();
+						String ip_llegada=tokens.nextToken();
+						String puerto_llegada=tokens.nextToken();
+						String message=tokens.nextToken();
+						dispach_message(ip_salida,puerto_salida,ip_llegada,puerto_llegada);
+						break;
+					case("send_message"):
+						String ip_salida2 =tokens.nextToken();
+						String puerto_salida2=tokens.nextToken();
+						String ip_llegada2=tokens.nextToken();
+						String puerto_llegada2=tokens.nextToken();
+						String message2=tokens.nextToken();
+						save_message(ip_salida2,puerto_salida2,ip_llegada2,puerto_llegada2,message2);
+						break;
+						
+					}
+				}
+
 				//outToClient.writeBytes(capitalizedSentence)   ca lo que se envia al clietne
 			}
 		catch (IOException e) 
