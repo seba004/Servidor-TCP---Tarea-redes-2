@@ -27,11 +27,11 @@ public class servidorTCP implements Runnable {
 		String linea;
 		
 		while((linea=br.readLine())!=null){
-			 String mensaje = protocol_set[1]+"##"+linea+"\n";
+			 String mensaje = protocol_set[1]+"¬¬"+linea+"\n";
 	         outClient.writeBytes(mensaje);
 	         outClient.flush();
 		}
-		outClient.writeBytes("¬¬"+"end"+"\n");
+		outClient.writeBytes("end"+"\n");
 		archivo.delete();
 	}
 	
