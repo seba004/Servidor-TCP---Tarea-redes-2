@@ -31,6 +31,7 @@ public class servidorTCP implements Runnable {
 	         outClient.writeBytes(mensaje);
 	         outClient.flush();
 		}
+		outClient.writeBytes("¬¬"+"end"+"\n");
 		archivo.delete();
 	}
 	
