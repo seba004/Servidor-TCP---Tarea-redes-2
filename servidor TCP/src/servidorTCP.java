@@ -18,23 +18,25 @@ public class servidorTCP implements Runnable {
 		outClient.flush();
 	}
 	
-	public void dispach_message (String IP,String puerto, String ip_contacto, String port_contacto) throws IOException{
+	public void dispach_message ( String ip_contacto) throws IOException{
 		DataOutputStream outClient =new DataOutputStream(this.con.getOutputStream());
-		String fichero =ip_contacto+port_contacto+IP+puerto+".txt";
-		FileReader fr = new FileReader (fichero);
+		String fichero ="src/"+ip_contacto+".txt";
+		File archivo = new File (fichero);
+		FileReader fr = new FileReader (archivo);
 		BufferedReader br = new BufferedReader(fr);
 		String linea;
 		
 		while((linea=br.readLine())!=null){
 			 String mensaje = protocol_set[1]+"##"+linea+"\n";
-	         outClient.writeBytes(linea);
+	         outClient.writeBytes(mensaje);
 	         outClient.flush();
 		}
+		archivo.delete();
 	}
 	
-	public void save_message(String IP,String puerto, String ip_contacto, String port_contacto,String message) throws IOException{
+	public void save_message(String IP,String message) throws IOException{
 		DataOutputStream outClient =new DataOutputStream(this.con.getOutputStream());
-		String fichero =IP+puerto+ip_contacto+port_contacto+".txt";
+		String fichero =IP+".txt";
 		FileWriter escri = new FileWriter("src/" + fichero,true);
 		escri.write(IP+":"+message+"\r\n");
 		escri.close();
@@ -87,7 +89,7 @@ public class servidorTCP implements Runnable {
 						String ip_llegada=tokens.nextToken();
 						String puerto_llegada=tokens.nextToken();
 						String message=tokens.nextToken();
-						dispach_message(ip_salida,puerto_salida,ip_llegada,puerto_llegada);
+						dispach_message(ip_salida);
 						break;
 					case("send_message"):
 						String ip_salida2 =tokens.nextToken();
@@ -95,7 +97,7 @@ public class servidorTCP implements Runnable {
 						String ip_llegada2=tokens.nextToken();
 						String puerto_llegada2=tokens.nextToken();
 						String message2=tokens.nextToken();
-						save_message(ip_salida2,puerto_salida2,ip_llegada2,puerto_llegada2,message2);
+						save_message(ip_salida2,message2);
 						break;
 						
 					}
