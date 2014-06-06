@@ -4,7 +4,7 @@ import java.util.StringTokenizer;
 
 public class servidorTCP implements Runnable {
 	
-	static final int puerto  = 9046;
+	static final int puerto  = 9100;
 	Socket con;
 	String protocol_set[] ={"hi_back","dispach_message","save_message"};
 	
@@ -22,23 +22,26 @@ public class servidorTCP implements Runnable {
 		DataOutputStream outClient =new DataOutputStream(this.con.getOutputStream());
 		String fichero ="src/"+ip_contacto+".txt";
 		File archivo = new File (fichero);
+		
 		if (archivo.exists()){
 			
 			FileReader fr = new FileReader (archivo);
 			BufferedReader br = new BufferedReader(fr);
 			String linea;
 		
-			while((linea=br.readLine())!=null){
-				String mensaje = protocol_set[1]+"¬¬"+linea+"\n";
+			while((linea=br.readLine()) != null){
+				
+				
+				String mensaje =linea+"\n";
 				outClient.writeBytes(mensaje);
 				outClient.flush();
 			}
-			outClient.writeBytes("end"+"¬¬"+"chau"+"\n");
-			outClient.flush();
+			
+			outClient.writeBytes("fin\n");
 			archivo.delete();
 		}	
 		else{
-			outClient.writeBytes("end"+"¬¬"+"chau"+"\n");
+			outClient.writeBytes("fin\n");
 			outClient.flush();
 			
 		}
@@ -78,7 +81,7 @@ public class servidorTCP implements Runnable {
 				clientSentence = inFromClient.readLine(); 
 				while(clientSentence != null){
 					
-					System.out.println(clientSentence);
+					
 					
 					StringTokenizer tokens = new StringTokenizer(clientSentence,"¬¬");
 					String Protocolo =tokens.nextToken();
@@ -86,30 +89,22 @@ public class servidorTCP implements Runnable {
 					case("say_hi"):
 						hi_back();
 						clientSentence = inFromClient.readLine();
-						System.out.println(clientSentence);
+						System.out.println("online");
 						
 						break;
-					case("ask_message"):
-						
+					case("ask_message"):						
 						String ip_contacto=tokens.nextToken();
 						
-						//String message=tokens.nextToken();
-						System.out.println(ip_contacto);
 						dispach_message(ip_contacto);
-						 clientSentence = null;
-						System.out.println("guardado:"+clientSentence);
-		                   
-						
-						
-						
+						clientSentence = inFromClient.readLine();
+						System.out.println("acabado");	
 						break;
 					case("send_message"):
-						
 						String ip_salida2 =tokens.nextToken();
 						String message2=tokens.nextToken();
 						save_message(ip_salida2,message2);
-						clientSentence = "rady";
-						System.out.println("ok"+clientSentence);
+						clientSentence = inFromClient.readLine();
+						System.out.println("ok");
 						//System.out.println("se cae en el server");
 						break;
 						
